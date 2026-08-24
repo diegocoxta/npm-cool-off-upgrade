@@ -1,0 +1,8 @@
+{
+  "name": "npm-dependencies-version-updater",
+  "version": "1.0.0",
+  "main": "cli.js",
+  "bin": {
+    "update": "./cli.js"
+  }
+}

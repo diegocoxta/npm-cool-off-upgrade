@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "main": "cli.js",
   "bin": {
-    "update": "./cli.js"
+    "npm-dependencies-version-updater": "./cli.js"
   }
 }

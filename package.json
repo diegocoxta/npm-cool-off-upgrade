@@ -1,8 +1,8 @@
 {
-  "name": "npm-dependencies-version-updater",
+  "name": "npm-cool-off-upgrade",
   "version": "1.0.0",
   "main": "cli.js",
   "bin": {
-    "npm-dependencies-version-updater": "./cli.js"
+    "cool-off-upgrade": "./cli.js"
   }
 }

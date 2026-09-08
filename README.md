@@ -20,6 +20,12 @@ to test it — just Node's standard library.
 
 This package is not published to npm. Install it straight from the Git repo.
 
+Run once without installing (Recommended):
+
+```bash
+npx github:diegocoxta/npm-cool-off-upgrade
+```
+
 Global install (adds the `cool-off-upgrade` command):
 
 ```bash
@@ -30,12 +36,6 @@ As a dev dependency in a project:
 
 ```bash
 npm install -D github:diegocoxta/npm-cool-off-upgrade
-```
-
-Run once without installing:
-
-```bash
-npx github:diegocoxta/npm-cool-off-upgrade
 ```
 
 Or clone and run it directly:

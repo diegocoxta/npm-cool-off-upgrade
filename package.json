@@ -1,8 +1,8 @@
 {
   "name": "cool-off-upgrade",
   "version": "1.0.0",
-  "main": "cli.js",
+  "main": "index.js",
   "bin": {
-    "cool-off-upgrade": "./cli.js"
+    "cool-off-upgrade": "./index.js"
   }
 }

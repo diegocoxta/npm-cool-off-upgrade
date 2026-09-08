@@ -1,5 +1,7 @@
 'use strict';
 
+const { describe, it, mock, afterEach } = require('node:test');
+const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
@@ -13,77 +15,74 @@ const {
 
 describe('detectFromPackageJson', () => {
     it('reads the name out of the "packageManager" field', () => {
-        expect(detectFromPackageJson({ packageManager: 'pnpm@8.6.0' })).toBe('pnpm');
-        expect(detectFromPackageJson({ packageManager: 'yarn@4.1.0' })).toBe('yarn');
+        assert.equal(detectFromPackageJson({ packageManager: 'pnpm@8.6.0' }), 'pnpm');
+        assert.equal(detectFromPackageJson({ packageManager: 'yarn@4.1.0' }), 'yarn');
     });
 
     it('returns null for an unknown manager or a missing field', () => {
-        expect(detectFromPackageJson({ packageManager: 'rush@5' })).toBeNull();
-        expect(detectFromPackageJson({})).toBeNull();
-        expect(detectFromPackageJson(null)).toBeNull();
+        assert.equal(detectFromPackageJson({ packageManager: 'rush@5' }), null);
+        assert.equal(detectFromPackageJson({}), null);
+        assert.equal(detectFromPackageJson(null), null);
     });
 });
 
 describe('detectFromLockFile', () => {
-    afterEach(() => jest.restoreAllMocks());
+    afterEach(() => mock.restoreAll());
 
     it('maps a lock file to its package manager', () => {
-        jest.spyOn(fs, 'existsSync').mockImplementation(
-            file => file === path.join('/project', 'pnpm-lock.yaml')
-        );
-
-        expect(detectFromLockFile('/project')).toBe('pnpm');
+        mock.method(fs, 'existsSync', file => file === path.join('/project', 'pnpm-lock.yaml'));
+        assert.equal(detectFromLockFile('/project'), 'pnpm');
     });
 
     it('recognises yarn.lock', () => {
-        jest.spyOn(fs, 'existsSync').mockImplementation(
-            file => file === path.join('/project', 'yarn.lock')
-        );
-
-        expect(detectFromLockFile('/project')).toBe('yarn');
+        mock.method(fs, 'existsSync', file => file === path.join('/project', 'yarn.lock'));
+        assert.equal(detectFromLockFile('/project'), 'yarn');
     });
 
     it('returns null when no known lock file exists', () => {
-        jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-        expect(detectFromLockFile('/project')).toBeNull();
+        mock.method(fs, 'existsSync', () => false);
+        assert.equal(detectFromLockFile('/project'), null);
     });
 });
 
 describe('detectPackageManager', () => {
-    afterEach(() => jest.restoreAllMocks());
+    afterEach(() => mock.restoreAll());
 
     it('prefers the package.json field over a lock file', () => {
-        jest.spyOn(fs, 'existsSync').mockImplementation(
-            file => file === path.join('/project', 'package-lock.json')
+        mock.method(fs, 'existsSync', file => file === path.join('/project', 'package-lock.json'));
+        assert.equal(
+            detectPackageManager('/project', { packageManager: 'yarn@4.1.0' }),
+            'yarn'
         );
-
-        expect(
-            detectPackageManager('/project', { packageManager: 'yarn@4.1.0' })
-        ).toBe('yarn');
     });
 
     it('falls back to the lock file when there is no field', () => {
-        jest.spyOn(fs, 'existsSync').mockImplementation(
-            file => file === path.join('/project', 'bun.lockb')
-        );
-
-        expect(detectPackageManager('/project', {})).toBe('bun');
+        mock.method(fs, 'existsSync', file => file === path.join('/project', 'bun.lockb'));
+        assert.equal(detectPackageManager('/project', {}), 'bun');
     });
 
     it('falls back to the default when nothing matches', () => {
-        jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-        expect(detectPackageManager('/project', {})).toBe(DEFAULT_PACKAGE_MANAGER);
+        mock.method(fs, 'existsSync', () => false);
+        assert.equal(detectPackageManager('/project', {}), DEFAULT_PACKAGE_MANAGER);
     });
 });
 
 describe('getCommands', () => {
-    it('builds install commands for a known manager', () => {
-        const pnpm = getCommands('pnpm');
-        expect(pnpm.install('a@1 b@2')).toBe('pnpm add a@1 b@2');
-        expect(pnpm.installDev('a@1')).toBe('pnpm add -D a@1');
+    it('builds install commands for every supported manager', () => {
+        assert.equal(getCommands('npm').install('a@1 b@2'), 'npm install a@1 b@2');
+        assert.equal(getCommands('npm').installDev('a@1'), 'npm install -D a@1');
+
+        assert.equal(getCommands('yarn').install('a@1'), 'yarn add a@1');
+        assert.equal(getCommands('yarn').installDev('a@1'), 'yarn add -D a@1');
+
+        assert.equal(getCommands('pnpm').install('a@1'), 'pnpm add a@1');
+        assert.equal(getCommands('pnpm').installDev('a@1'), 'pnpm add -D a@1');
+
+        assert.equal(getCommands('bun').install('a@1'), 'bun add a@1');
+        assert.equal(getCommands('bun').installDev('a@1'), 'bun add -d a@1');
     });
 
     it('falls back to the default manager for an unknown name', () => {
-        expect(getCommands('rush').install('a@1')).toBe('npm install a@1');
+        assert.equal(getCommands('rush').install('a@1'), 'npm install a@1');
     });
 });

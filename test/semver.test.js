@@ -1,5 +1,8 @@
 'use strict';
 
+const { describe, it } = require('node:test');
+const assert = require('node:assert/strict');
+
 const {
     toParts,
     cleanVersion,
@@ -9,62 +12,68 @@ const {
 
 describe('toParts', () => {
     it('splits a version into numeric parts', () => {
-        expect(toParts('1.2.3')).toEqual([1, 2, 3]);
+        assert.deepEqual(toParts('1.2.3'), [1, 2, 3]);
     });
 
     it('treats non-numeric parts as 0', () => {
-        expect(toParts('1.x.3')).toEqual([1, 0, 3]);
+        assert.deepEqual(toParts('1.x.3'), [1, 0, 3]);
     });
 });
 
 describe('cleanVersion', () => {
-    it.each([
+    for (const [input, expected] of [
         ['^1.2.3', '1.2.3'],
         ['~4.5.6', '4.5.6'],
         ['>=10.0.1', '10.0.1'],
         ['1.2.3', '1.2.3']
-    ])('extracts %s -> %s', (input, expected) => {
-        expect(cleanVersion(input)).toBe(expected);
-    });
+    ]) {
+        it(`extracts ${input} -> ${expected}`, () => {
+            assert.equal(cleanVersion(input), expected);
+        });
+    }
 
-    it.each(['*', 'latest', 'workspace:*', 'file:../pkg', ''])(
-        'returns null for the non-semver range "%s"',
-        input => {
-            expect(cleanVersion(input)).toBeNull();
-        }
-    );
+    for (const input of ['*', 'latest', 'workspace:*', 'file:../pkg', '']) {
+        it(`returns null for the non-semver range "${input}"`, () => {
+            assert.equal(cleanVersion(input), null);
+        });
+    }
 });
 
 describe('isSemverGreater', () => {
     it('is true when the first version is higher', () => {
-        expect(isSemverGreater('1.2.4', '1.2.3')).toBe(true);
-        expect(isSemverGreater('2.0.0', '1.9.9')).toBe(true);
-        expect(isSemverGreater('1.3.0', '1.2.9')).toBe(true);
+        assert.equal(isSemverGreater('1.2.4', '1.2.3'), true);
+        assert.equal(isSemverGreater('2.0.0', '1.9.9'), true);
+        assert.equal(isSemverGreater('1.3.0', '1.2.9'), true);
     });
 
     it('is false when the versions are equal or lower', () => {
-        expect(isSemverGreater('1.2.3', '1.2.3')).toBe(false);
-        expect(isSemverGreater('1.2.3', '1.2.4')).toBe(false);
+        assert.equal(isSemverGreater('1.2.3', '1.2.3'), false);
+        assert.equal(isSemverGreater('1.2.3', '1.2.4'), false);
+    });
+
+    it('compares parts of differing length', () => {
+        assert.equal(isSemverGreater('1.2.0.1', '1.2'), true);
+        assert.equal(isSemverGreater('1.2', '1.2.0.1'), false);
     });
 
     it('is false for known invalid / missing values', () => {
-        expect(isSemverGreater('Nenhuma', '1.0.0')).toBe(false);
-        expect(isSemverGreater('Erro/Privado', '1.0.0')).toBe(false);
-        expect(isSemverGreater('', '1.0.0')).toBe(false);
-        expect(isSemverGreater('1.0.0', '')).toBe(false);
+        assert.equal(isSemverGreater('Nenhuma', '1.0.0'), false);
+        assert.equal(isSemverGreater('Erro/Privado', '1.0.0'), false);
+        assert.equal(isSemverGreater('', '1.0.0'), false);
+        assert.equal(isSemverGreater('1.0.0', ''), false);
     });
 });
 
 describe('getUpdateType', () => {
     it('classifies a major bump as a breaking change', () => {
-        expect(getUpdateType('1.2.3', '2.0.0')).toBe('breaking change');
+        assert.equal(getUpdateType('1.2.3', '2.0.0'), 'breaking change');
     });
 
     it('classifies a minor bump as minor', () => {
-        expect(getUpdateType('1.2.3', '1.3.0')).toBe('minor');
+        assert.equal(getUpdateType('1.2.3', '1.3.0'), 'minor');
     });
 
     it('classifies a patch bump as patch', () => {
-        expect(getUpdateType('1.2.3', '1.2.9')).toBe('patch');
+        assert.equal(getUpdateType('1.2.3', '1.2.9'), 'patch');
     });
 });

@@ -6,9 +6,7 @@
     "cool-off-upgrade": "./index.js"
   },
   "scripts": {
-    "test": "jest"
-  },
-  "devDependencies": {
-    "jest": "^30.5.1"
+    "test": "node --test",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100"
   }
 }

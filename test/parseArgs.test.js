@@ -1,10 +1,13 @@
 'use strict';
 
+const { describe, it, mock, afterEach } = require('node:test');
+const assert = require('node:assert/strict');
+
 const { parseArgs, DEFAULT_DAYS, DEFAULT_TYPE } = require('../index');
 
 describe('parseArgs', () => {
     it('returns the defaults when no flags are given', () => {
-        expect(parseArgs([])).toEqual({
+        assert.deepEqual(parseArgs([]), {
             days: DEFAULT_DAYS,
             type: DEFAULT_TYPE,
             ignore: []
@@ -12,7 +15,7 @@ describe('parseArgs', () => {
     });
 
     it('ignores positional arguments that are not flags', () => {
-        expect(parseArgs(['check', 'now'])).toEqual({
+        assert.deepEqual(parseArgs(['check', 'now']), {
             days: DEFAULT_DAYS,
             type: DEFAULT_TYPE,
             ignore: []
@@ -20,32 +23,30 @@ describe('parseArgs', () => {
     });
 
     it('parses the "--flag value" form', () => {
-        expect(parseArgs(['--days', '14', '--type', 'minor'])).toMatchObject({
-            days: 14,
-            type: 'minor'
-        });
+        const parsed = parseArgs(['--days', '14', '--type', 'minor']);
+        assert.equal(parsed.days, 14);
+        assert.equal(parsed.type, 'minor');
     });
 
     it('parses the "--flag=value" form', () => {
-        expect(parseArgs(['--days=30', '--type=patch'])).toMatchObject({
-            days: 30,
-            type: 'patch'
-        });
+        const parsed = parseArgs(['--days=30', '--type=patch']);
+        assert.equal(parsed.days, 30);
+        assert.equal(parsed.type, 'patch');
     });
 
     it('accepts --days 0', () => {
-        expect(parseArgs(['--days', '0']).days).toBe(0);
+        assert.equal(parseArgs(['--days', '0']).days, 0);
     });
 
     it('collects repeated --ignore flags', () => {
-        expect(parseArgs(['--ignore', 'react', '--ignore', 'vue']).ignore).toEqual([
+        assert.deepEqual(parseArgs(['--ignore', 'react', '--ignore', 'vue']).ignore, [
             'react',
             'vue'
         ]);
     });
 
     it('splits a comma-separated --ignore list and trims each name', () => {
-        expect(parseArgs(['--ignore', ' react , react-dom ,vue ']).ignore).toEqual([
+        assert.deepEqual(parseArgs(['--ignore', ' react , react-dom ,vue ']).ignore, [
             'react',
             'react-dom',
             'vue'
@@ -53,44 +54,43 @@ describe('parseArgs', () => {
     });
 
     it('combines repeated and comma-separated --ignore values', () => {
-        expect(parseArgs(['--ignore=a,b', '--ignore', 'c']).ignore).toEqual([
+        assert.deepEqual(parseArgs(['--ignore=a,b', '--ignore', 'c']).ignore, [
             'a',
             'b',
             'c'
         ]);
     });
 
+    it('drops an --ignore flag with no value', () => {
+        assert.deepEqual(parseArgs(['--ignore']).ignore, []);
+    });
+
     describe('invalid input', () => {
-        let exitSpy;
-        let errorSpy;
+        afterEach(() => mock.restoreAll());
 
-        beforeEach(() => {
-            exitSpy = jest
-                .spyOn(process, 'exit')
-                .mockImplementation(() => {
-                    throw new Error('process.exit');
-                });
-            errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
-
-        afterEach(() => {
-            exitSpy.mockRestore();
-            errorSpy.mockRestore();
-        });
+        function stubExit() {
+            mock.method(console, 'error', () => {});
+            return mock.method(process, 'exit', () => {
+                throw new Error('process.exit');
+            });
+        }
 
         it('exits on a non-integer --days value', () => {
-            expect(() => parseArgs(['--days', 'soon'])).toThrow('process.exit');
-            expect(exitSpy).toHaveBeenCalledWith(1);
+            const exit = stubExit();
+            assert.throws(() => parseArgs(['--days', 'soon']), /process\.exit/);
+            assert.deepEqual(exit.mock.calls[0].arguments, [1]);
         });
 
         it('exits on a negative --days value', () => {
-            expect(() => parseArgs(['--days', '-3'])).toThrow('process.exit');
-            expect(exitSpy).toHaveBeenCalledWith(1);
+            const exit = stubExit();
+            assert.throws(() => parseArgs(['--days', '-3']), /process\.exit/);
+            assert.deepEqual(exit.mock.calls[0].arguments, [1]);
         });
 
         it('exits on an unknown --type value', () => {
-            expect(() => parseArgs(['--type', 'major'])).toThrow('process.exit');
-            expect(exitSpy).toHaveBeenCalledWith(1);
+            const exit = stubExit();
+            assert.throws(() => parseArgs(['--type', 'major']), /process\.exit/);
+            assert.deepEqual(exit.mock.calls[0].arguments, [1]);
         });
     });
 });

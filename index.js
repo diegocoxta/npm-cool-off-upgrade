@@ -368,12 +368,14 @@ async function run() {
     printUpdateCommands(commands, depRows, devDepRows);
 }
 
+/* node:coverage disable */
 if (require.main === module) {
     run().catch(error => {
         console.error('❌ Unexpected error:', error.message);
         process.exit(1);
     });
 }
+/* node:coverage enable */
 
 module.exports = {
     parseArgs,

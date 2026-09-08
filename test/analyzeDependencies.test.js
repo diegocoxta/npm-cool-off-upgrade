@@ -1,5 +1,8 @@
 'use strict';
 
+const { describe, it, mock, beforeEach, afterEach } = require('node:test');
+const assert = require('node:assert/strict');
+
 const { analyzeDependencies } = require('../index');
 
 function isoDaysAgo(days) {
@@ -13,38 +16,38 @@ function isoDaysAgo(days) {
 function registryPayload(version, days) {
     return {
         ok: true,
-        json: () =>
-            Promise.resolve({
-                time: {
-                    created: isoDaysAgo(999),
-                    '0.9.0': isoDaysAgo(400),
-                    [version]: isoDaysAgo(days)
-                }
-            })
+        json: async () => ({
+            time: {
+                created: isoDaysAgo(999),
+                '0.9.0': isoDaysAgo(400),
+                [version]: isoDaysAgo(days)
+            }
+        })
     };
 }
 
 describe('analyzeDependencies', () => {
-    let warnSpy;
-
     beforeEach(() => {
-        warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        mock.method(console, 'warn', () => {});
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
-        delete global.fetch;
+        mock.restoreAll();
     });
 
     it('returns an empty array for missing or empty deps', async () => {
-        await expect(analyzeDependencies(undefined, 'dependencies', 7, new Set()))
-            .resolves.toEqual([]);
-        await expect(analyzeDependencies({}, 'dependencies', 7, new Set()))
-            .resolves.toEqual([]);
+        assert.deepEqual(
+            await analyzeDependencies(undefined, 'dependencies', 7, new Set()),
+            []
+        );
+        assert.deepEqual(
+            await analyzeDependencies({}, 'dependencies', 7, new Set()),
+            []
+        );
     });
 
     it('reports a package that has an upgrade past the cool-off window', async () => {
-        global.fetch = jest.fn().mockResolvedValue(registryPayload('1.5.0', 30));
+        mock.method(global, 'fetch', async () => registryPayload('1.5.0', 30));
 
         const rows = await analyzeDependencies(
             { lodash: '^1.2.3' },
@@ -53,20 +56,25 @@ describe('analyzeDependencies', () => {
             new Set()
         );
 
-        expect(rows).toEqual([
+        assert.equal(rows.length, 1);
+        assert.deepEqual(
+            { ...rows[0], remoteReleaseDate: undefined },
             {
                 name: 'lodash',
                 localVersion: '1.2.3',
                 remoteVersion: '1.5.0',
-                remoteReleaseDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+                remoteReleaseDate: undefined,
                 type: 'minor',
                 section: 'dependencies'
             }
-        ]);
+        );
+        assert.match(rows[0].remoteReleaseDate, /^\d{4}-\d{2}-\d{2}$/);
     });
 
     it('skips packages listed in the ignore set', async () => {
-        global.fetch = jest.fn().mockResolvedValue(registryPayload('9.0.0', 30));
+        const fetchMock = mock.method(global, 'fetch', async () =>
+            registryPayload('9.0.0', 30)
+        );
 
         const rows = await analyzeDependencies(
             { lodash: '^1.2.3' },
@@ -75,12 +83,15 @@ describe('analyzeDependencies', () => {
             new Set(['lodash'])
         );
 
-        expect(rows).toEqual([]);
-        expect(global.fetch).not.toHaveBeenCalled();
+        assert.deepEqual(rows, []);
+        assert.equal(fetchMock.mock.callCount(), 0);
     });
 
     it('skips non-semver ranges with a warning', async () => {
-        global.fetch = jest.fn();
+        const fetchMock = mock.method(global, 'fetch', async () => {
+            throw new Error('should not be called');
+        });
+        const warn = mock.method(console, 'warn', () => {});
 
         const rows = await analyzeDependencies(
             { local: 'workspace:*' },
@@ -89,13 +100,14 @@ describe('analyzeDependencies', () => {
             new Set()
         );
 
-        expect(rows).toEqual([]);
-        expect(global.fetch).not.toHaveBeenCalled();
-        expect(warnSpy).toHaveBeenCalled();
+        assert.deepEqual(rows, []);
+        assert.equal(fetchMock.mock.callCount(), 0);
+        assert.equal(warn.mock.callCount(), 1);
     });
 
     it('skips packages that cannot be fetched', async () => {
-        global.fetch = jest.fn().mockResolvedValue({ ok: false });
+        mock.method(global, 'fetch', async () => ({ ok: false }));
+        const warn = mock.method(console, 'warn', () => {});
 
         const rows = await analyzeDependencies(
             { private: '^1.0.0' },
@@ -104,12 +116,27 @@ describe('analyzeDependencies', () => {
             new Set()
         );
 
-        expect(rows).toEqual([]);
-        expect(warnSpy).toHaveBeenCalled();
+        assert.deepEqual(rows, []);
+        assert.equal(warn.mock.callCount(), 1);
+    });
+
+    it('skips packages whose metadata has no "time" map', async () => {
+        mock.method(global, 'fetch', async () => ({ ok: true, json: async () => ({}) }));
+        const warn = mock.method(console, 'warn', () => {});
+
+        const rows = await analyzeDependencies(
+            { weird: '^1.0.0' },
+            'dependencies',
+            7,
+            new Set()
+        );
+
+        assert.deepEqual(rows, []);
+        assert.equal(warn.mock.callCount(), 1);
     });
 
     it('does not report a package that is already up to date', async () => {
-        global.fetch = jest.fn().mockResolvedValue(registryPayload('1.2.3', 30));
+        mock.method(global, 'fetch', async () => registryPayload('1.2.3', 30));
 
         const rows = await analyzeDependencies(
             { lodash: '^1.2.3' },
@@ -118,11 +145,11 @@ describe('analyzeDependencies', () => {
             new Set()
         );
 
-        expect(rows).toEqual([]);
+        assert.deepEqual(rows, []);
     });
 
     it('does not report an upgrade that is still inside the cool-off window', async () => {
-        global.fetch = jest.fn().mockResolvedValue(registryPayload('2.0.0', 2));
+        mock.method(global, 'fetch', async () => registryPayload('2.0.0', 2));
 
         const rows = await analyzeDependencies(
             { lodash: '^1.2.3' },
@@ -131,6 +158,6 @@ describe('analyzeDependencies', () => {
             new Set()
         );
 
-        expect(rows).toEqual([]);
+        assert.deepEqual(rows, []);
     });
 });

@@ -4,5 +4,11 @@
   "main": "index.js",
   "bin": {
     "cool-off-upgrade": "./index.js"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^30.5.1"
   }
 }

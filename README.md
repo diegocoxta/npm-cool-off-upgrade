@@ -63,7 +63,7 @@ versions.
 | Option              | Default | Description                                                                                     |
 | ------------------- | ------- | --------------------------------------------------------------------------------------------- |
 | `--days <n>`        | `7`     | Cool-off period in days. A version is only considered if it was published more than `n` days ago. `0` disables the cool-off. |
-| `--type <type>`     | `all`   | Which upgrades to show: `all` (breaking + minor + patch), `minor` (minor + patch), or `patch`. |
+| `--type <type>`     | `all`   | Which upgrades to show: `all` (major + minor + patch), `minor` (minor + patch), or `patch`. |
 | `--ignore <names>`  | —       | Package names to skip. Repeatable, and also accepts a comma-separated list.                     |
 
 Both `--flag value` and `--flag=value` forms are accepted.
@@ -88,11 +88,11 @@ cool-off-upgrade --ignore react,react-dom --ignore typescript
 ⏳ Cool-off period: 7 day(s)
 🔎 Type filter: all
 
-| package name  | local version | remote version | remote version release date | type            |
-| ------------- | ------------- | -------------- | --------------------------- | --------------- |
-| lodash        | 4.17.20       | 4.17.21        | 2021-02-20                  | patch           |
-| zod           | 3.22.4        | 3.23.8         | 2024-05-06                  | minor           |
-| vite          | 4.5.0         | 5.4.2          | 2024-08-20                  | breaking change |
+| package name  | local version | remote version | remote version release date | type  |
+| ------------- | ------------- | -------------- | --------------------------- | ----- |
+| lodash        | 4.17.20       | 4.17.21        | 2021-02-20                  | patch |
+| zod           | 3.22.4        | 3.23.8         | 2024-05-06                  | minor |
+| vite          | 4.5.0         | 5.4.2          | 2024-08-20                  | major |
 
 ======================================================
 💡 Run the command(s) below to upgrade (exact versions)
@@ -116,8 +116,8 @@ pnpm add -D vite@5.4.2
    `https://registry.npmjs.org` and picks the newest **stable** version
    (no pre-release tag) that was published more than `--days` days ago.
 4. Keeps only packages where that version is greater than the one in your
-   `package.json`, classifies the jump as `breaking change` / `minor` /
-   `patch`, and filters by `--type`.
+   `package.json`, classifies the jump as `major` / `minor` / `patch`, and
+   filters by `--type`.
 5. Prints the table and the install commands.
 
 The tool never edits your `package.json` or runs an install — it only reports

@@ -28,7 +28,7 @@ describe('renderTable', () => {
     it('keeps every row the same width as the header', () => {
         const lines = renderTable([
             ROW,
-            { ...ROW, name: 'a-much-longer-package-name', type: 'breaking change' }
+            { ...ROW, name: 'a-much-longer-package-name', type: 'major' }
         ]).split('\n');
 
         const width = lines[0].length;
@@ -38,9 +38,9 @@ describe('renderTable', () => {
     });
 
     it('pads a column to fit its widest value', () => {
-        const table = renderTable([{ ...ROW, type: 'breaking change' }]);
-        // "breaking change" is wider than the "type" header, so that column's
-        // header cell is padded out to 15 characters.
-        assert.ok(table.includes('| type            |'));
+        const table = renderTable([{ ...ROW, type: 'major' }]);
+        // "major" is wider than the "type" header, so that column's header
+        // cell is padded out to 5 characters.
+        assert.ok(table.includes('| type  |'));
     });
 });

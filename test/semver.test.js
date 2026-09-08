@@ -65,8 +65,8 @@ describe('isSemverGreater', () => {
 });
 
 describe('getUpdateType', () => {
-    it('classifies a major bump as a breaking change', () => {
-        assert.equal(getUpdateType('1.2.3', '2.0.0'), 'breaking change');
+    it('classifies a major bump as major', () => {
+        assert.equal(getUpdateType('1.2.3', '2.0.0'), 'major');
     });
 
     it('classifies a minor bump as minor', () => {

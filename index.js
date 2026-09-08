@@ -15,7 +15,7 @@ const VALID_TYPES = ['all', 'minor', 'patch'];
 
 // Which update types each --type value lets through.
 const TYPE_FILTERS = {
-    all: ['breaking change', 'minor', 'patch'],
+    all: ['major', 'minor', 'patch'],
     minor: ['minor', 'patch'],
     patch: ['patch']
 };
@@ -97,12 +97,12 @@ function isSemverGreater(v1, v2) {
 }
 
 // Classifies an upgrade from `local` to `remote` (assumes remote > local).
-// major changed -> "breaking change"; minor changed -> "minor"; otherwise -> "patch".
+// major changed -> "major"; minor changed -> "minor"; otherwise -> "patch".
 function getUpdateType(local, remote) {
     const [localMajor, localMinor] = toParts(local);
     const [remoteMajor, remoteMinor] = toParts(remote);
 
-    if (remoteMajor > localMajor) return 'breaking change';
+    if (remoteMajor > localMajor) return 'major';
     if (remoteMajor === localMajor && remoteMinor > localMinor) return 'minor';
     return 'patch';
 }

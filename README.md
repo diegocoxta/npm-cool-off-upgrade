@@ -1,13 +1,16 @@
 # cool-off-upgrade
 
-A tiny, zero-dependency CLI that tells you which of your dependencies have a
-**stable** upgrade available — but only counts versions that have been public
-long enough to be trusted.
+A tiny CLI that tells you which of your dependencies have a **stable** upgrade
+available — but only counts versions that have been public long enough to be
+trusted.
 
 Fresh releases are where regressions, broken builds and supply-chain incidents
 tend to show up. `cool-off-upgrade` applies a **cool-off period**: a new version
 is only suggested once it has been on the npm registry for at least N days
 (7 by default).
+
+**Zero dependencies.** Nothing is installed to run it, and nothing is installed
+to test it — just Node's standard library.
 
 ## Requirements
 
@@ -119,6 +122,20 @@ pnpm add -D vite@5.4.2
 
 The tool never edits your `package.json` or runs an install — it only reports
 and prints the commands for you to run.
+
+## Development
+
+There is no `npm install` step — the test suite lives in `test/` and runs on
+Node's built-in test runner:
+
+```bash
+npm test          # node --test
+npm run coverage  # node --test with coverage, enforced at 100%
+```
+
+`index.js` exports its pure functions so they can be tested in isolation; the
+CLI only runs when the file is executed directly. `npm test` works on Node 18+;
+`npm run coverage` needs Node 22+ for the coverage thresholds.
 
 ## Contributing
 

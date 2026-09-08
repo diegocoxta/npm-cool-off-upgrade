@@ -4,5 +4,9 @@
   "main": "index.js",
   "bin": {
     "cool-off-upgrade": "./index.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100"
   }
 }

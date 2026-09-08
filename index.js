@@ -368,7 +368,36 @@ async function run() {
     printUpdateCommands(commands, depRows, devDepRows);
 }
 
-run().catch(error => {
-    console.error('❌ Unexpected error:', error.message);
-    process.exit(1);
-});
+/* node:coverage disable */
+if (require.main === module) {
+    run().catch(error => {
+        console.error('❌ Unexpected error:', error.message);
+        process.exit(1);
+    });
+}
+/* node:coverage enable */
+
+module.exports = {
+    parseArgs,
+    toParts,
+    cleanVersion,
+    isSemverGreater,
+    getUpdateType,
+    getPackageData,
+    getLatestStableOverDays,
+    detectFromPackageJson,
+    detectFromLockFile,
+    detectPackageManager,
+    getCommands,
+    analyzeDependencies,
+    renderTable,
+    printUpdateCommands,
+    readPackageJson,
+    run,
+    PACKAGE_MANAGERS,
+    DEFAULT_PACKAGE_MANAGER,
+    TYPE_FILTERS,
+    DEFAULT_DAYS,
+    DEFAULT_TYPE,
+    VALID_TYPES
+};

@@ -19,7 +19,7 @@ describe('renderTable', () => {
 
         assert.equal(lines.length, 3);
         assert.ok(lines[0].includes('package name'));
-        assert.ok(lines[0].includes('remote version release date'));
+        assert.ok(lines[0].includes('release date'));
         assert.match(lines[1], /^\| -+ \| -+ \| -+ \| -+ \| -+ \|$/);
         assert.ok(lines[2].includes('lodash'));
         assert.ok(lines[2].includes('4.17.21'));

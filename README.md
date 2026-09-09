@@ -89,10 +89,10 @@ cool-off-upgrade --ignore react,react-dom --ignore typescript
 🔎 Type filter: all
 
 | package name  | local version | remote version | release date | type  |
-| ------------- | ------------- | -------------- | --------------------------- | ----- |
-| lodash        | 4.17.20       | 4.17.21        | 2021-02-20                  | patch |
-| zod           | 3.22.4        | 3.23.8         | 2024-05-06                  | minor |
-| vite          | 4.5.0         | 5.4.2          | 2024-08-20                  | major |
+| ------------- | ------------- | -------------- | ------------ | ----- |
+| lodash        | 4.17.20       | 4.17.21        | 2021-02-20   | patch |
+| zod           | 3.22.4        | 3.23.8         | 2024-05-06   | minor |
+| vite          | 4.5.0         | 5.4.2          | 2024-08-20   | major |
 
 ======================================================
 💡 Run the command(s) below to upgrade (exact versions)

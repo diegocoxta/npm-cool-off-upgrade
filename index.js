@@ -256,7 +256,7 @@ const TABLE_COLUMNS = [
     ['package name', row => row.name],
     ['local version', row => row.localVersion],
     ['remote version', row => row.remoteVersion],
-    ['remote version release date', row => row.remoteReleaseDate],
+    ['release date', row => row.remoteReleaseDate],
     ['type', row => row.type]
 ];
 

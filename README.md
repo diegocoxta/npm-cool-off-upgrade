@@ -88,7 +88,7 @@ cool-off-upgrade --ignore react,react-dom --ignore typescript
 ⏳ Cool-off period: 7 day(s)
 🔎 Type filter: all
 
-| package name  | local version | remote version | remote version release date | type  |
+| package name  | local version | remote version | release date | type  |
 | ------------- | ------------- | -------------- | --------------------------- | ----- |
 | lodash        | 4.17.20       | 4.17.21        | 2021-02-20                  | patch |
 | zod           | 3.22.4        | 3.23.8         | 2024-05-06                  | minor |
